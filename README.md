@@ -169,6 +169,28 @@ You must also have installed Redis server, because this gem is storing data into
 
 After installation and configuration, start your Rails application, make a few requests, and open `https://localhost:3000/rails/performance` URL.
 
+### JSON API downloads
+
+Every dashboard page can be downloaded as a JSON file by adding `format=json` to the URL:
+
+```bash
+curl -OJ "http://localhost:3000/rails/performance?format=json"
+curl -OJ "http://localhost:3000/rails/performance/resources?format=json"
+curl -OJ "http://localhost:3000/rails/performance/summary?format=json"
+curl -OJ "http://localhost:3000/rails/performance/trace/REQUEST_ID?format=json"
+curl -OJ "http://localhost:3000/rails/performance/crashes?format=json"
+curl -OJ "http://localhost:3000/rails/performance/requests?format=json"
+curl -OJ "http://localhost:3000/rails/performance/recent?format=json"
+curl -OJ "http://localhost:3000/rails/performance/slow?format=json"
+curl -OJ "http://localhost:3000/rails/performance/sidekiq?format=json"
+curl -OJ "http://localhost:3000/rails/performance/delayed_job?format=json"
+curl -OJ "http://localhost:3000/rails/performance/custom?format=json"
+curl -OJ "http://localhost:3000/rails/performance/grape?format=json"
+curl -OJ "http://localhost:3000/rails/performance/rake?format=json"
+```
+
+Replace `REQUEST_ID` with a request trace ID. The `-O` and `-J` options save the response using the JSON filename supplied by the server. To print the response instead, use `curl -s URL | jq`.
+
 ### Alternative: Mounting the engine yourself
 
 If you, for whatever reason (company policy, devise, ...) need to mount RailsPerformance yourself, feel free to do so by using the following snippet as inspiration.
