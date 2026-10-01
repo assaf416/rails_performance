@@ -1,0 +1,30 @@
+<% if table.data.any? %>
+  <table class="table is-fullwidth is-hoverable is-narrow">
+    <thead>
+      <tr>
+        <th data-sort="string">Remote IP</th>
+        <th data-sort="int">Web</th>
+        <th data-sort="int">Mobile</th>
+        <th data-sort="int">Tablet</th>
+        <th data-sort="string">User names</th>
+        <th data-sort="string">Employers</th>
+        <th data-sort="int">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% table.data.each do |entry| %>
+        <tr>
+          <td><%= entry[:remote_ip] %></td>
+          <td><%= entry[:web] %></td>
+          <td><%= entry[:mobile] %></td>
+          <td><%= entry[:tablet] %></td>
+          <td><%= entry[:user_names].join(", ") %></td>
+          <td><%= entry[:employers].join(", ") %></td>
+          <td><%= entry[:total] %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p><%= table.empty_message %></p>
+<% end %>

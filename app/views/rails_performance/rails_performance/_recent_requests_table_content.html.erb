@@ -6,7 +6,10 @@
       <th data-sort="string">Controller#action</th>
       <th data-sort="string">Method</th>
       <th data-sort="string">Format</th>
-      <th></th>
+      <th data-sort="string">Device</th>
+      <th data-sort="string">Remote IP</th>
+      <th data-sort="string">User</th>
+      <th data-sort="string">Employer</th>
       <th data-sort="string">Path</th>
       <th data-sort="string">Status</th>
       <th data-sort="float">Duration</th>
@@ -18,7 +21,7 @@
   <tbody>
     <% if table.data.empty? %>
       <tr>
-        <td colspan="12"><%= table.empty_message %></td>
+        <td colspan="15"><%= table.empty_message %></td>
       </tr>
     <% end %>
     <% table.data.each do |e| %>

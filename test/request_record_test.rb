@@ -8,6 +8,25 @@ class RequestRecordTest < ActiveSupport::TestCase
     end
   end
 
+  test "stores remote IP and device type" do
+    record = dummy_event
+    record.remote_ip = "203.0.113.4"
+    record.device_type = "mobile"
+    record.save
+
+    stored = RailsPerformance::Models::RequestRecord.find_by(request_id: record.request_id)
+    assert_equal "203.0.113.4", stored.remote_ip
+    assert_equal "mobile", stored.device_type
+    assert_equal "203.0.113.4", stored.record_hash[:remote_ip]
+    assert_equal "mobile", stored.record_hash[:device_type]
+  end
+
+  test "classifies user agents by device type" do
+    assert_equal "web", RailsPerformance::Models::RequestRecord.device_type_for("Mozilla/5.0 (X11; Linux x86_64) Chrome/120.0 Safari/537.36")
+    assert_equal "mobile", RailsPerformance::Models::RequestRecord.device_type_for("Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148")
+    assert_equal "tablet", RailsPerformance::Models::RequestRecord.device_type_for("Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15")
+  end
+
   test "record" do
     RailsPerformance.duration = 3.hours
 

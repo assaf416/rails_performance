@@ -1,7 +1,7 @@
 <table class="<%= table.table_classes %>">
   <thead>
     <tr>
-      <th colspan='3'>Name</th>
+      <th colspan='5'>Name</th>
       <th colspan='3' class="attention">Percentile</th>
       <th colspan='3'>Average</th>
       <th colspan='3'>Slowest</th>
@@ -10,6 +10,8 @@
       <th data-sort="string">Controller#action</th>
       <th data-sort="string">Format</th>
       <th data-sort="int">Requests</th>
+      <th data-sort="string">User names</th>
+      <th data-sort="string">Employers</th>
       <th data-sort="float" class="attention">P50</th>
       <th data-sort="float" class="attention">P95</th>
       <th data-sort="float" class="attention">P99</th>
@@ -36,6 +38,8 @@
         </td>
         <td><%= link_to groups[1].try(:upcase),  rails_performance.rails_performance_summary_path({controller_eq: c, action_eq: a, format_eq: groups[1]}), remote: true %></td>
         <td><%= e[:count] %></td>
+        <td><%= e[:user_names].join(", ") %></td>
+        <td><%= e[:employers].join(", ") %></td>
         <td class="nowrap attention"><%= ms e[:p50_duration] %></td>
         <td class="nowrap attention"><%= ms e[:p95_duration] %></td>
         <td class="nowrap attention"><%= ms e[:p99_duration] %></td>

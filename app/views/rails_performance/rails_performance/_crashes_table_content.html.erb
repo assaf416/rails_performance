@@ -6,6 +6,8 @@
       <th data-sort="string">Method</th>
       <th data-sort="string">Format</th>
       <th></th>
+      <th data-sort="string">User</th>
+      <th data-sort="string">Employer</th>
       <th data-sort="string">Path</th>
       <th data-sort="string">Exception</th>
       <th data-sort="string">Backtrace</th>
@@ -18,7 +20,7 @@
   <tbody>
     <% if table.data.empty? %>
       <tr>
-        <td colspan="12"><%= table.empty_message %></td>
+        <td colspan="14"><%= table.empty_message %></td>
       </tr>
     <% end %>
 
@@ -36,6 +38,8 @@
         <td><%= e[:method] %></td>
         <td><%= e[:format] %></td>
         <td><%= bot_icon e["user_agent"] %></td>
+        <td><%= e["user_name"] %></td>
+        <td><%= e["employer"] %></td>
         <td>
           <span class="with_external_icon">
             <%= link_to_path(e) %>

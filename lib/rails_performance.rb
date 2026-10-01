@@ -17,6 +17,7 @@ require_relative "rails_performance/data_source"
 require_relative "rails_performance/utils"
 require_relative "rails_performance/reports/base_report"
 require_relative "rails_performance/reports/requests_report"
+require_relative "rails_performance/reports/traffic_by_ip_report"
 require_relative "rails_performance/reports/crash_report"
 require_relative "rails_performance/reports/response_time_report"
 require_relative "rails_performance/reports/throughput_report"
@@ -37,6 +38,7 @@ require_relative "rails_performance/widgets/response_time_chart"
 require_relative "rails_performance/widgets/percentile_card"
 require_relative "rails_performance/widgets/resource_chart"
 require_relative "rails_performance/widgets/requests_table"
+require_relative "rails_performance/widgets/traffic_by_ip_table"
 require_relative "rails_performance/widgets/recent_requests_table"
 require_relative "rails_performance/widgets/crashes_table"
 require_relative "rails_performance/widgets/slow_requests_table"
@@ -160,7 +162,8 @@ module RailsPerformance
   @@dashboard_charts = [
     ["P50Card", "P95Card", "P99Card"],
     "ThroughputChart",
-    "ResponseTimeChart"
+    "ResponseTimeChart",
+    "TrafficByIpTable"
   ]
 
   # -- internal usage --

@@ -3,7 +3,18 @@ module RailsPerformance
     class RequestRecord < BaseRecord
       attr_accessor :controller, :action, :format, :status, :datetime, :datetimei, :method, :path, :request_id, :json
       attr_accessor :view_runtime, :db_runtime, :duration, :http_referer, :custom_data
+      attr_accessor :remote_ip, :device_type
       attr_accessor :exception, :exception_object
+
+      def self.device_type_for(user_agent)
+        device = Browser.new(user_agent.to_s).device
+        return "tablet" if device.tablet?
+        return "mobile" if device.mobile?
+
+        "web"
+      rescue StandardError
+        "web"
+      end
 
       def self.find_by(request_id:)
         keys, values = RailsPerformance::Utils.fetch_from_redis("performance|*|request_id|#{request_id}|*")
@@ -49,11 +60,13 @@ module RailsPerformance
           json: value,
           duration: parsed_value["duration"],
           view_runtime: parsed_value["view_runtime"],
-          db_runtime: parsed_value["db_runtime"]
+          db_runtime: parsed_value["db_runtime"],
+          remote_ip: parsed_value["remote_ip"],
+          device_type: parsed_value["device_type"]
         )
       end
 
-      def initialize(controller:, action:, format:, status:, datetime:, datetimei:, method:, path:, request_id:, view_runtime: nil, db_runtime: nil, duration: nil, http_referer: nil, custom_data: nil, exception: nil, exception_object: nil, json: "{}")
+      def initialize(controller:, action:, format:, status:, datetime:, datetimei:, method:, path:, request_id:, view_runtime: nil, db_runtime: nil, duration: nil, http_referer: nil, custom_data: nil, remote_ip: nil, device_type: nil, exception: nil, exception_object: nil, json: "{}")
         @controller = controller
         @action = action
         @format = format
@@ -69,6 +82,8 @@ module RailsPerformance
         @duration = duration
         @http_referer = http_referer
         @custom_data = custom_data
+        @remote_ip = remote_ip
+        @device_type = device_type
 
         @exception = Array.wrap(exception).compact.join(" ")
         @exception_object = exception_object
@@ -94,6 +109,8 @@ module RailsPerformance
           method: method,
           path: path,
           request_id: request_id,
+          remote_ip: remote_ip,
+          device_type: device_type,
           datetime: RailsPerformance::Utils.from_datetimei(datetimei.to_i),
           datetimei: datetimei,
           duration: value["duration"],
@@ -121,7 +138,9 @@ module RailsPerformance
           db_runtime: db_runtime,
           duration: duration,
           http_referer: http_referer,
-          custom_data: custom_data.to_json
+          custom_data: custom_data.to_json,
+          remote_ip: remote_ip,
+          device_type: device_type
         }
         value[:exception] = exception if exception.present?
         value[:backtrace] = exception_object.backtrace.take(3) if exception_object

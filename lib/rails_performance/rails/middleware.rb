@@ -52,6 +52,8 @@ module RailsPerformance
 
               # capture referer from where this page was opened
               record.http_referer = env["HTTP_REFERER"] if record.status == 404
+              record.remote_ip = ::ActionDispatch::Request.new(env).remote_ip
+              record.device_type = Models::RequestRecord.device_type_for(env["HTTP_USER_AGENT"])
 
               # we can add custom data, for example Http User-Agent
               # or even devise current_user

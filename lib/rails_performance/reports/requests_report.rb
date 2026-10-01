@@ -13,6 +13,8 @@ module RailsPerformance
           {
             group: k,
             count: v.size,
+            user_names: custom_values(v, "user_name"),
+            employers: custom_values(v, "employer"),
             duration_average: durations.sum.to_f / durations.size,
             view_runtime_average: view_runtimes.sum.to_f / view_runtimes.size,
             db_runtime_average: db_runtimes.sum.to_f / db_runtimes.size,
@@ -24,6 +26,22 @@ module RailsPerformance
             p99_duration: RailsPerformance::Utils.percentile(durations, 99)
           }
         end.sort_by { |e| -e[sort].to_f } # to_f because could ne NaN or nil
+      end
+
+      private
+
+      def custom_values(records, key)
+        records.each_with_object([]) do |record, values|
+          data = begin
+            JSON.parse(record["custom_data"] || "{}")
+          rescue JSON::ParserError
+            {}
+          end
+          next unless data.is_a?(Hash)
+
+          value = data[key]
+          values << value unless value.nil? || value == ""
+        end.uniq.sort
       end
     end
   end

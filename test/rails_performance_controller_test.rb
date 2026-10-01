@@ -53,6 +53,26 @@ class RailsPerformanceControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "records request IP and device type and shows IP usage on dashboard" do
+    get "/home/about", headers: {"HTTP_USER_AGENT" => "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148"}
+    assert_response :success
+
+    record = RailsPerformance::DataSource.new(type: :requests).db.data.find { |request| request.path == "/home/about" }
+    assert_equal "127.0.0.1", record.remote_ip
+    assert_equal "mobile", record.device_type
+
+    get "/rails/performance"
+    assert_response :success
+    assert_includes response.body, "Requests by IP and device"
+    assert_includes response.body, "127.0.0.1"
+    assert_includes response.body, "Mobile"
+
+    get "/rails/performance/recent"
+    assert_response :success
+    assert_includes response.body, "Remote IP"
+    assert_includes response.body, "mobile"
+  end
+
   test "should get index with params" do
     setup_db
     get "/rails/performance", params: {controller_eq: "Home", action_eq: "index"}

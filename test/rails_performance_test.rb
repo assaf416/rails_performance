@@ -17,6 +17,22 @@ class RailsPerformance::Test < ActiveSupport::TestCase
     assert_not_nil RailsPerformance::Reports::RequestsReport.new(ds.db, group: :controller_action_format, sort: :db_runtime_slowest).data
   end
 
+  test "requests report includes distinct user names and employers" do
+    first = dummy_event(controller: "Users", action: "index")
+    first.custom_data = {user_name: "Alex", employer: "Example Corp"}
+    first.save
+
+    second = dummy_event(controller: "Users", action: "index")
+    second.custom_data = {user_name: "Sam", employer: "Example Corp"}
+    second.save
+
+    datasource = RailsPerformance::DataSource.new(type: :requests)
+    report = RailsPerformance::Reports::RequestsReport.new(datasource.db, group: :controller_action_format)
+
+    assert_equal ["Alex", "Sam"], report.data.first[:user_names]
+    assert_equal ["Example Corp"], report.data.first[:employers]
+  end
+
   test "report ThroughputReport" do
     setup_db
 

@@ -18,7 +18,10 @@
   </td>
   <td><%= e[:method] %></td>
   <td><%= e[:format] %></td>
-  <td><%= bot_icon e["user_agent"] %></td>
+  <td><%= bot_icon e["user_agent"] %> <%= e[:device_type] %></td>
+  <td><%= e[:remote_ip] %></td>
+  <td><%= e["user_name"] %></td>
+  <td><%= e["employer"] %></td>
   <td>
     <span class="with_external_icon">
       <%= link_to_path(e) %>

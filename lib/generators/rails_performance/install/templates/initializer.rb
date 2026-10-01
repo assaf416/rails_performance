@@ -43,10 +43,11 @@ if defined?(RailsPerformance)
 
     # store custom data for the request
     # config.custom_data_proc = proc do |env|
-    #   request = Rack::Request.new(env)
+    #   user = env["warden"]&.user
     #   {
-    #     email: request.env['warden'].user&.email, # if you are using Devise for example
-    #     user_agent: request.env['HTTP_USER_AGENT']
+    #     user_name: user&.try(:name),
+    #     employer: user&.try(:employer)&.try(:name), # adapt to your user/employer models
+    #     user_agent: env["HTTP_USER_AGENT"]
     #   }
     # end
 
