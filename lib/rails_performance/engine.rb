@@ -78,6 +78,12 @@ module RailsPerformance
     config.after_initialize do
       next unless RailsPerformance.enabled
 
+      if defined?(::Rack::MiniProfiler)
+        asset_path = "#{RailsPerformance.mount_at}/assets"
+        ::Rack::MiniProfiler.config.skip_paths ||= []
+        ::Rack::MiniProfiler.config.skip_paths << asset_path unless ::Rack::MiniProfiler.config.skip_paths.include?(asset_path)
+      end
+
       ActionView::LogSubscriber.send :prepend, RailsPerformance::Extensions::View
       ActiveRecord::LogSubscriber.send :prepend, RailsPerformance::Extensions::Db if defined?(ActiveRecord)
 

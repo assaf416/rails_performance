@@ -95,6 +95,26 @@ class RailsPerformanceControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "should download JSON for every UI page" do
+    pages = %w[index resources summary trace crashes requests recent slow sidekiq delayed_job custom grape rake]
+
+    pages.each do |page|
+      path = if page == "index"
+        "/rails/performance"
+      elsif page == "trace"
+        "/rails/performance/trace/test-request"
+      else
+        "/rails/performance/#{page}"
+      end
+      get path, params: {format: :json}
+
+      assert_response :success, "#{page} (#{response.status}): #{response.body[0, 200]}"
+      assert_equal "application/json", response.media_type, page
+      assert_includes response.headers["Content-Disposition"], "attachment", page
+      assert_equal page, JSON.parse(response.body).fetch("page"), page
+    end
+  end
+
   test "should get about page" do
     get "/account/site/about"
     assert_response :success

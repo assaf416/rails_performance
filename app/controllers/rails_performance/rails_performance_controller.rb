@@ -21,6 +21,11 @@ module RailsPerformance
             Widgets.const_get(row).new(@datasource)
           end
         end
+
+        respond_to do |format|
+          format.html
+          format.json { send_json_download "index", page: "index", widgets: widgets_json(@widgets) }
+        end
       end
 
       def resources
@@ -28,6 +33,16 @@ module RailsPerformance
         db = @datasource.db
 
         @resources_report = RailsPerformance::Reports::ResourcesReport.new(db)
+
+        respond_to do |format|
+          format.html
+          format.json do
+            servers = @resources_report.servers.map do |server|
+              {name: server.name, widgets: widgets_json(server.charts)}
+            end
+            send_json_download "resources", page: "resources", servers: servers
+          end
+        end
       end
 
       def summary
@@ -39,6 +54,13 @@ module RailsPerformance
         @data = RailsPerformance::Reports::BreakdownReport.new(db, title: "Requests").data
         respond_to do |format|
           format.js {}
+          format.json do
+            send_json_download "summary", page: "summary", data: {
+              throughput: @throughput_report_data,
+              response_time: @response_time_report_data,
+              breakdown: @data
+            }
+          end
           format.any do
             render plain: "Doesn't open in new window. Wait until full page load."
           end
@@ -50,6 +72,7 @@ module RailsPerformance
         @data = RailsPerformance::Reports::TraceReport.new(request_id: params[:id]).data
         respond_to do |format|
           format.js {}
+          format.json { send_json_download "trace_#{params[:id]}", page: "trace", record: @record&.record_hash, data: @data }
           format.any do
             render plain: "Doesn't open in new window. Wait until full page load."
           end
@@ -65,6 +88,7 @@ module RailsPerformance
           format.csv do
             export_to_csv "error_report", @table.data
           end
+          format.json { send_json_download "crashes", page: "crashes", data: @table.data }
         end
       end
 
@@ -77,6 +101,7 @@ module RailsPerformance
           format.csv do
             export_to_csv "requests_report", @table.data
           end
+          format.json { send_json_download "requests", page: "requests", data: @table.data }
         end
       end
 
@@ -89,6 +114,7 @@ module RailsPerformance
           format.csv do
             export_to_csv "recent_requests_report", @table.data
           end
+          format.json { send_json_download "recent", page: "recent", data: @table.data }
         end
       end
 
@@ -101,6 +127,7 @@ module RailsPerformance
           format.csv do
             export_to_csv "slow_requests_report", @table.data
           end
+          format.json { send_json_download "slow", page: "slow", data: @table.data }
         end
       end
 
@@ -111,6 +138,11 @@ module RailsPerformance
           Widgets::ResponseTimeChart.new(@datasource, subtitle: "Average Execution Time"),
           Widgets::SidekiqJobsTable.new(@datasource)
         ]
+
+        respond_to do |format|
+          format.html
+          format.json { send_json_download "sidekiq", page: "sidekiq", widgets: widgets_json(@widgets) }
+        end
       end
 
       def delayed_job
@@ -120,6 +152,11 @@ module RailsPerformance
           Widgets::ResponseTimeChart.new(@datasource, subtitle: "Average Execution Time"),
           Widgets::DelayedJobTable.new(@datasource)
         ]
+
+        respond_to do |format|
+          format.html
+          format.json { send_json_download "delayed_job", page: "delayed_job", widgets: widgets_json(@widgets) }
+        end
       end
 
       def custom
@@ -129,6 +166,11 @@ module RailsPerformance
           Widgets::ThroughputChart.new(@datasource, subtitle: "Custom Events Throughput Report", legend: "Events", units: "events / minute"),
           Widgets::ResponseTimeChart.new(@datasource, subtitle: "Average Execution Time")
         ]
+
+        respond_to do |format|
+          format.html
+          format.json { send_json_download "custom", page: "custom", widgets: widgets_json(@widgets) }
+        end
       end
 
       def grape
@@ -137,6 +179,11 @@ module RailsPerformance
           Widgets::ThroughputChart.new(@datasource, subtitle: "Grape Throughput Report"),
           Widgets::GrapeRequestsTable.new(@datasource)
         ]
+
+        respond_to do |format|
+          format.html
+          format.json { send_json_download "grape", page: "grape", widgets: widgets_json(@widgets) }
+        end
       end
 
       def rake
@@ -145,9 +192,40 @@ module RailsPerformance
           Widgets::RakeTasksTable.new(@datasource),
           Widgets::ThroughputChart.new(@datasource, subtitle: "Rake Throughput Report", legend: "Tasks", units: "tasks / minute")
         ]
+
+        respond_to do |format|
+          format.html
+          format.json { send_json_download "rake", page: "rake", widgets: widgets_json(@widgets) }
+        end
       end
 
       private
+
+      def send_json_download(filename, payload)
+        send_data JSON.pretty_generate(payload),
+          filename: "#{filename}_#{Time.zone.today}.json",
+          type: "application/json",
+          disposition: "attachment"
+      end
+
+      def widgets_json(widgets)
+        Array(widgets).flatten.map do |widget|
+          {
+            type: widget.class.name.demodulize,
+            title: widget.respond_to?(:subtitle) ? widget.subtitle : nil,
+            description: widget.respond_to?(:description) ? widget.description : nil,
+            legend: widget.respond_to?(:legend) ? widget.legend : nil,
+            units: widget.respond_to?(:units) ? widget.units : nil,
+            data: widget.respond_to?(:data) ? widget.data : widget_value(widget)
+          }
+        end
+      end
+
+      def widget_value(widget)
+        return unless widget.respond_to?(:value)
+
+        {label: widget.label, value: widget.value}
+      end
 
       def prepare_query(query = {})
         RailsPerformance::Rails::QueryBuilder.compose_from(query)
