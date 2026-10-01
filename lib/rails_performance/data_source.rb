@@ -46,7 +46,12 @@ module RailsPerformance
       return [] if keys.blank?
 
       keys.each_with_index do |key, index|
-        yield klass.from_db(key, values[index])
+        record = klass.from_db(key, values[index])
+        if type == :requests && q[:user_name].present?
+          record_user_name = record.record_hash["user_name"] || record.record_hash[:user_name]
+          next unless record_user_name.to_s == q[:user_name].to_s
+        end
+        yield record
       end
     end
 

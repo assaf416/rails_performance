@@ -132,6 +132,9 @@ module RailsPerformance
   mattr_accessor :custom_data_proc
   @@custom_data_proc = nil
 
+  mattr_accessor :capture_user_data
+  @@capture_user_data = true
+
   # include rake tasks
   mattr_accessor :include_rake_tasks
   @@include_rake_tasks = false

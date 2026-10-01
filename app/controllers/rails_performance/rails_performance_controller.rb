@@ -7,6 +7,12 @@ module RailsPerformance
     if RailsPerformance.enabled
       def index
         @datasource = RailsPerformance::DataSource.new(**prepare_query(params), type: :requests)
+        users_datasource = RailsPerformance::DataSource.new(type: :requests, q: @datasource.q.except(:user_name))
+        @user_names = users_datasource.db.data
+          .map { |record| record.record_hash["user_name"] || record.record_hash[:user_name] }
+          .compact
+          .uniq
+          .sort
 
         @widgets = RailsPerformance.dashboard_charts.map do |row|
           if row.is_a?(Array)

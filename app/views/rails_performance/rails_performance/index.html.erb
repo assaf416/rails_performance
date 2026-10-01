@@ -4,6 +4,21 @@
   <%#= link_to raw("&larr; Back"), rails_performance_path, class: "back_link" %>
 <% end %>
 
+<form action="<%= request.path %>" method="get" class="field is-grouped is-align-items-center">
+  <label for="user_name_eq" class="label mb-0">Requests for</label>
+  <div class="control">
+    <div class="select">
+      <select id="user_name_eq" name="user_name_eq">
+        <option value="">All users</option>
+        <%= options_for_select(@user_names, @datasource.q[:user_name]) %>
+      </select>
+    </div>
+  </div>
+  <div class="control">
+    <button type="submit" class="button">Apply</button>
+  </div>
+</form>
+
 <div class="has-text-right mb-4">
   <rails-performance-autoupdate interval="10s">
     <label id="autoupdate_label">

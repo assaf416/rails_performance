@@ -57,10 +57,7 @@ module RailsPerformance
 
               # we can add custom data, for example Http User-Agent
               # or even devise current_user
-              if RailsPerformance.custom_data_proc
-                # just to be sure it won't break format how we store in redis
-                record.custom_data = RailsPerformance.custom_data_proc.call(env)
-              end
+              record.custom_data = request_custom_data(env)
 
               # store for section "recent requests"
               # store request information (regular rails request)
@@ -71,6 +68,26 @@ module RailsPerformance
         # puts "==> store performance data: #{(RailsPerformance::Utils.time - t).round(3)}ms"
 
         [@status, @headers, @response]
+      end
+
+      private
+
+      def request_custom_data(env)
+        data = {}
+        if RailsPerformance.capture_user_data && (user = env["warden"]&.user)
+          user_name = user.try(:name).presence || user.try(:full_name).presence || user.try(:email).presence
+          employer = user.try(:employer)
+          employer = user.try(:employer_name) if employer.blank?
+          employer = employer.try(:name).presence || employer if employer.present?
+          data[:user_name] = user_name if user_name.present?
+          data[:employer] = employer if employer.present?
+        end
+
+        return data unless RailsPerformance.custom_data_proc
+
+        custom_data = RailsPerformance.custom_data_proc.call(env)
+        data = data.merge(custom_data) if custom_data.is_a?(Hash)
+        data.presence || custom_data
       end
     end
   end

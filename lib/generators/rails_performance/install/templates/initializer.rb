@@ -41,7 +41,11 @@ if defined?(RailsPerformance)
     # For example, all routes starting with '/admin' can be ignored:
     config.ignored_paths = ["/rails/performance"]
 
-    # store custom data for the request
+    # Capture the signed-in Warden user's name/email and employer by default.
+    # Set false to avoid recording user identity in request data.
+    config.capture_user_data = true
+
+    # Store additional custom request data; values override the defaults above.
     # config.custom_data_proc = proc do |env|
     #   user = env["warden"]&.user
     #   {

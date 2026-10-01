@@ -27,4 +27,18 @@ class TrafficByIpReportTest < ActiveSupport::TestCase
       {remote_ip: "198.51.100.2", web: 0, mobile: 1, tablet: 0, user_names: ["Alex"], employers: ["Other Corp"], total: 1}
     ], report.data
   end
+
+  test "filters request records by user name" do
+    ["Alex", "Sam"].each do |user_name|
+      record = dummy_event
+      record.remote_ip = "203.0.113.4"
+      record.custom_data = {user_name: user_name}
+      record.save
+    end
+
+    query = RailsPerformance::Rails::QueryBuilder.compose_from(user_name_eq: "Alex")[:q]
+    datasource = RailsPerformance::DataSource.new(type: :requests, q: query)
+
+    assert_equal ["Alex"], datasource.db.data.map { |record| record.record_hash["user_name"] }.uniq
+  end
 end

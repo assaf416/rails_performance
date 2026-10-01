@@ -1,6 +1,10 @@
 require "test_helper"
 
 class RailsPerformance::Test < ActiveSupport::TestCase
+  setup do
+    reset_redis
+  end
+
   test "datastore" do
     setup_db
     ds = RailsPerformance::DataSource.new(q: {}, type: :requests)
